@@ -7,6 +7,7 @@ public class RoomController : MonoBehaviour {
 	public RoomBlock roomBlock;
 	private SpriteRenderer spriteRenderer;
 	private LocationController locController;
+	private SpecterController specterController;
 	private int occupiedNPC;
 	private bool occupiedSpec;
 	public bool isHaunted;
@@ -25,6 +26,7 @@ public class RoomController : MonoBehaviour {
 		roomBlock = GetComponentInChildren<RoomBlock>();
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		locController = FindObjectOfType<LocationController>();
+		specterController = FindObjectOfType<SpecterController>();
 	}
 
 
@@ -65,6 +67,9 @@ public class RoomController : MonoBehaviour {
 		}
 		if (hauntingLevel >= requiredToHaunt){
 			isHaunted = true;
+			if (occupiedSpec){
+				specterController.inSafeRoom = true;
+			}
 		}
 	}
 

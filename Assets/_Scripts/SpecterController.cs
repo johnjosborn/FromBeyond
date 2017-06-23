@@ -9,12 +9,21 @@ public class SpecterController : MonoBehaviour {
 	private bool returnToAnchor;
 	private SpriteRenderer anchorSprite;
 
+	private float energyTimeInc = 1f;
+	private float energyTime = 0f;
+
+	private float energyGainRate = 1f;
+	private float energyLossRate = -1f;
+
 	public float anchorDistance;
-
 	public float effectiveMoveSpeed;
-
 	public float maxMoveSpeed;
+
+	public float currentEnergy;
+	public float maxEnergy = 100f;
+
 	public bool canMove;
+	public bool inSafeRoom;
 	public SpecterAnchor activeAnchor;
 
 	// Use this for initialization
@@ -23,6 +32,7 @@ public class SpecterController : MonoBehaviour {
 		playerRigidbody = GetComponent<Rigidbody2D>();
 		canMove = true;
 		effectiveMoveSpeed = maxMoveSpeed;
+		currentEnergy = maxEnergy;
 	}
 
 
@@ -66,11 +76,41 @@ public class SpecterController : MonoBehaviour {
 			returnToAnchor = false;
 			anchorSprite.color = Color.white;
 		}
+
+		if (Time.time > energyTime){
+			energyTime += energyTimeInc;
+			if (inSafeRoom){
+				ChangeEnergy(energyGainRate);
+			} else {
+				ChangeEnergy(energyLossRate);
+			}
+		}
+
 	}
 
 	public void SetActiveAnchor (SpecterAnchor anchor){
 		activeAnchor = anchor;
 		anchorSprite = activeAnchor.GetComponent<SpriteRenderer>();
+	}
+
+	public void ChangeEnergy(float energy){
+		Mathf.Clamp(currentEnergy += energy, 0f, maxEnergy);
+		if (currentEnergy <=0){
+			FailEndLevel();
+		}
+	}
+
+	void FailEndLevel(){
+		Debug.Log("End Level");
+	}
+
+	void OnTriggerEnter2D(Collider2D other){
+		if (other.tag == "Room"){
+			inSafeRoom = other.GetComponent<RoomController>().isHaunted;
+		} else if (other.tag == "NPC"){
+			ChangeEnergy( ( 1-other.gameObject.GetComponent<NPCController>().terrorAsPercent ) * energyLossRate * 10f);
+		}
+
 	}
 
 
