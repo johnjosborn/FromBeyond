@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class NPCController : MonoBehaviour {
 
-	public int npcSpeed;
+	private int npcSpeed;
+	public int maxNPCSpeed;
 	public int maxTerror;
 	public int currentTerror;
 	public float terrorAsPercent;
@@ -12,31 +13,48 @@ public class NPCController : MonoBehaviour {
 	public float colorLerpDuration;
 	public bool targetReached;
 	public bool onCorrectFloor;
+	public bool isFleeing;
 
 	public RoomController finalTarget;
+	public RoomController currentRoom;
+	public RoomController exitRoom;
 	public Animator livingAnimator;
 	public GameObject locationNode;
+
+	public AudioClip[] npcScaredSounds;
+
+	public AudioClip heardSomething;
+
 
 	private SpriteRenderer spiritSpriteRenderer;
 
 	private LocationController locationController;
 	private Animator spiritAnimator;
-	private Color targetColor;
 	private Color currentColor;
 	private float colorLerpTime = 1;
-	//private float roomVertOffest = 2;
 	private EntryExit entryExit;
 	private Vector3 finalTargetPosition;
+	private SpecterData specterData;
+	private AudioSource audioSource;
 
+	private IEnumerator coroutine;
 
 	// Use this for initialization
 	void Start () {
 		locationController = FindObjectOfType<LocationController>();
+		specterData = FindObjectOfType<SpecterData>();
+
+		entryExit = FindObjectOfType<EntryExit>();
+		exitRoom = entryExit.gameObject.GetComponent<RoomController>();
+
 		spiritAnimator = GetComponent<Animator>();
 		spiritSpriteRenderer = GetComponent<SpriteRenderer>();
-		currentTerror = 0;
-		entryExit = FindObjectOfType<EntryExit>();
+		audioSource = GetComponent<AudioSource>();
+
 		finalTargetPosition = finalTarget.transform.position;
+
+		currentTerror = 0;
+		npcSpeed = maxNPCSpeed;
 	}
 	
 	// Update is called once per frame
@@ -46,7 +64,8 @@ public class NPCController : MonoBehaviour {
 			if (!targetReached){
 				transform.position = Vector2.MoveTowards(transform.position, finalTargetPosition, npcSpeed * Time.deltaTime);
 			} else {
-				if ((Time.time - timeArrived > finalTarget.dwellTime)){
+				if ((Time.time - timeArrived > finalTarget.dwellTime) && !isFleeing){
+					Debug.Log("Set taregt from update");
 					SetNewTarget();
 					targetReached = false;
 				}
@@ -81,6 +100,8 @@ public class NPCController : MonoBehaviour {
 
 		if (transform.position == finalTargetPosition && !targetReached){
 			targetReached = true;
+			isFleeing = false;
+			npcSpeed = maxNPCSpeed;
 			timeArrived = Time.time;
 		}
 
@@ -92,8 +113,15 @@ public class NPCController : MonoBehaviour {
 	}
 
 	void SetNewTarget(){
+		Debug.Log("Set new target method.");
 		finalTarget = locationController.GetEmptyRoom();
-		finalTargetPosition = finalTarget.transform.position;
+		TrackLocation(finalTarget);
+	}
+
+	void TrackLocation(RoomController room){
+		Debug.Log("Room tracked: " + room.ToString() + " time " + Time.time.ToString());
+		targetReached = false;
+		finalTargetPosition = room.transform.position;
 		if (Mathf.Abs(transform.position.y - finalTargetPosition.y) < .1f){
 			onCorrectFloor = true;
 		} else {
@@ -102,31 +130,59 @@ public class NPCController : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D(Collider2D other){
-		if(other.tag == "Player"){
-			ScareNPC(2);
+		if(other.tag == "Player" && !isFleeing){
+				ScareNPC(2);
+		} else if (other.tag == "Sound" && !isFleeing){
+			finalTarget = specterData.currentRoom;
+			if (finalTarget == currentRoom){
+				ScareNPC(2);
+			} else {
+				audioSource.PlayOneShot(heardSomething);
+				TrackLocation(finalTarget);
+			}
+		} else if (other.tag == "Room"){
+			currentRoom = other.gameObject.GetComponent<RoomController>();
 		}
 	}
 
-	void ScareNPC(int terror){
+	public void ScareNPC(int terror){
+
+		//audioSource.PlayOneShot(scaredSound);
+
 		currentTerror += terror;
 		terrorAsPercent = (float)currentTerror / maxTerror;
+
 		currentColor = spiritSpriteRenderer.color;
-		targetColor = new Color(1f,1f - terrorAsPercent,1f - terrorAsPercent,1f);
 		colorLerpTime = 0;
-		if (terrorAsPercent >= 1){
-			FleeArea();
+
+		isFleeing = true;
+
+		if (terrorAsPercent >= 1f){
+			Debug.Log("Flee house");
+
+			coroutine = PlayNPCSound(0.4f, npcScaredSounds[0]);
+			StartCoroutine(coroutine);
+
+			npcSpeed = npcSpeed * 4;
+			FleeHouse();
+		} else {
+
+			Debug.Log("run to new room");
+
+			coroutine = PlayNPCSound(0.4f, npcScaredSounds[1]);
+			StartCoroutine(coroutine);
+			npcSpeed = npcSpeed * 2;
+			SetNewTarget();
 		}
 	}
 
-	void FleeArea(){
-		targetReached = false;
-		finalTargetPosition = entryExit.transform.position;
-		if (Mathf.Abs(transform.position.y - finalTargetPosition.y) < .1f){
-			onCorrectFloor = true;
-		} else {
-			onCorrectFloor = false;
-		}
-		npcSpeed = npcSpeed * 2;
+	IEnumerator PlayNPCSound(float delaySound, AudioClip clipToPlay){
+		yield return new WaitForSeconds(delaySound);
+		audioSource.PlayOneShot(clipToPlay);
+	}
+
+	void FleeHouse(){
+		TrackLocation(exitRoom);
 	}
 
 

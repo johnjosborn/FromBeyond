@@ -4,18 +4,24 @@ using UnityEngine;
 
 public class RoomController : MonoBehaviour {
 
-	public RoomBlock roomBlock;
+	private RoomBlock roomBlock;
 	private SpriteRenderer spriteRenderer;
 	private LocationController locController;
-	private SpecterController specterController;
+	//private SpecterController specterController;
+	private SpecterData specterData;
 	private int occupiedNPC;
 	private bool occupiedSpec;
 	public bool isHaunted;
 	public bool isLocked;
+	public bool isStairs;
 
 	private float hauntTimeInc = 1f;
 	private float hauntTime = 0f;
 	private float hauntingAsAPercentage;
+
+	private Color currentColor;
+	private float colorLerpTime = 1f;
+	private float colorLerpDuration = 1f;
 
 	public float dwellTime;
 	public int hauntingLevel;
@@ -26,7 +32,7 @@ public class RoomController : MonoBehaviour {
 		roomBlock = GetComponentInChildren<RoomBlock>();
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		locController = FindObjectOfType<LocationController>();
-		specterController = FindObjectOfType<SpecterController>();
+		specterData = FindObjectOfType<SpecterData>();
 	}
 
 
@@ -34,19 +40,9 @@ public class RoomController : MonoBehaviour {
 
 		if (!isHaunted && Time.time > hauntTime){
 			hauntTime += hauntTimeInc;
-			if( occupiedSpec && occupiedNPC <=0){
-				//player only
-				ChangeHaunting(1);
-			} else if(occupiedSpec && occupiedNPC > 0){
-				//player and npc
-				ChangeHaunting(-2);
-			} else if(!occupiedSpec && occupiedNPC > 0){
-				//npc only
-				ChangeHaunting(-5);
-			} else if(!occupiedSpec && occupiedNPC <= 0){
-				//empty
+			if(!occupiedSpec){
 				ChangeHaunting(-1);
-			}
+			} 
 		}
 
 		if (isHaunted){
@@ -57,20 +53,25 @@ public class RoomController : MonoBehaviour {
 		} else {
 			spriteRenderer.color = Color.red;
 		}
+
+		if(colorLerpTime < 1 && !isHaunted && !isLocked){
+			spriteRenderer.color = Color.LerpUnclamped(currentColor, new Color(hauntingAsAPercentage,hauntingAsAPercentage,hauntingAsAPercentage, 1f), colorLerpTime);
+			colorLerpTime += Time.deltaTime/colorLerpDuration;
+		}
 			
 	}
 
-	void ChangeHaunting(int haunt){
+	public void ChangeHaunting(int haunt){
 		hauntingLevel = Mathf.Clamp(hauntingLevel + haunt, 0, requiredToHaunt);
 		if (hauntingLevel >= requiredToHaunt / 2){
-			locController.UnblockAdjacentRooms(transform.position.x, transform.position.y);
+			locController.UnblockAdjacentRooms(transform.position.x, transform.position.y, isStairs);
 		}
 		if (hauntingLevel >= requiredToHaunt){
 			isHaunted = true;
-			if (occupiedSpec){
-				specterController.inSafeRoom = true;
-			}
+			specterData.inSafeRoom = true;
 		}
+		currentColor = spriteRenderer.color;
+		colorLerpTime = 0f;
 	}
 
 	public void RemoveBlock(){
@@ -79,10 +80,8 @@ public class RoomController : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D other){
 		if (other.tag == "Player"){
-			Debug.Log("Player enter: " + this);
 			occupiedSpec = true;
 		} else if (other.tag == "NPC"){
-			Debug.Log("NPC enter: " + this);
 			occupiedNPC += 1;
 		}
 	}

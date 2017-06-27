@@ -2,15 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LocationNode : MonoBehaviour {
-
-	bool isOccupied;
-
-	public float dwellTime;
+public class LivingOffSet : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
+		transform.position = new Vector3(transform.position.x + 100, transform.position.y, transform.position.z);
 	}
 	
 	// Update is called once per frame

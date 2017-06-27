@@ -24,17 +24,24 @@ public class LocationController : MonoBehaviour {
 		return room;
 	}
 
-	public void UnblockAdjacentRooms(float xPos, float yPos){
+	public void UnblockAdjacentRooms(float xPos, float yPos, bool isStairs){
 		foreach (var item in roomControllers){
 			float roomX = item.transform.position.x;
 			float roomY = item.transform.position.y;
-			if (Mathf.Abs(roomX - xPos) <= 5.1f && Mathf.Abs(roomY - yPos) <= 0.1f){
-				item.RemoveBlock();
-				item.isLocked = false;
-			}
-			if (Mathf.Abs(roomX - xPos) <= 0.1f && Mathf.Abs(roomY - yPos) <= 5.1f){
-				item.RemoveBlock();
-				item.isLocked = false;
+			if (isStairs){
+				if (Mathf.Abs(roomX - xPos) <= 5.1f && Mathf.Abs(roomY - yPos) <= 0.1f){
+					item.RemoveBlock();
+					item.isLocked = false;
+				}
+				if (Mathf.Abs(roomX - xPos) <= 0.1f && Mathf.Abs(roomY - yPos) <= 5.1f){
+					item.RemoveBlock();
+					item.isLocked = false;
+				}
+			} else {
+				if (Mathf.Abs(roomX - xPos) <= 5.1f && Mathf.Abs(roomY - yPos) <= 0.1f){
+					item.RemoveBlock();
+					item.isLocked = false;
+				}
 			}
 		}
 	}
