@@ -6,14 +6,24 @@ public class NPCController : MonoBehaviour {
 
 	private int npcSpeed;
 	public int maxNPCSpeed;
-	public int maxTerror;
-	public int currentTerror;
-	public float terrorAsPercent;
 	public float timeArrived;
 	public float colorLerpDuration;
 	public bool targetReached;
 	public bool onCorrectFloor;
 	public bool isFleeing;
+	public bool canMove;
+	public bool terrorFalling;
+	public bool tensionFalling;
+
+	public float maxTerror;
+	public float currentTerror;
+	public float terrorAsPercent;
+
+	public float currentTension;
+	public float maxTension;
+
+	public float npcBravery;
+
 
 	public RoomController finalTarget;
 	public RoomController currentRoom;
@@ -54,12 +64,15 @@ public class NPCController : MonoBehaviour {
 		finalTargetPosition = finalTarget.transform.position;
 
 		currentTerror = 0;
+		currentTension = 100f;
 		npcSpeed = maxNPCSpeed;
+		canMove = true;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		if (onCorrectFloor){
+		if(canMove){
+			if (onCorrectFloor){
 			
 			if (!targetReached){
 				transform.position = Vector2.MoveTowards(transform.position, finalTargetPosition, npcSpeed * Time.deltaTime);
@@ -71,31 +84,32 @@ public class NPCController : MonoBehaviour {
 				}
 			}
 			
-		} else {
-
-			if (Mathf.Abs(transform.position.x - locationController.stairsPosition.position.x) < .1f){
-				//wrong floor, on stairs
-				if (transform.position.y > finalTargetPosition.y){
-					//move down
-					transform.Translate(Vector3.down * Time.deltaTime * npcSpeed);
-				} else {
-					//move up
-					transform.Translate(Vector3.up * Time.deltaTime * npcSpeed);
-				}
 			} else {
-				//move towards stairs
-				if (transform.position.x > locationController.stairsPosition.position.x){
-					//move left
-					transform.Translate(Vector3.left * Time.deltaTime * npcSpeed);
-				} else {
-					//move up
-					transform.Translate(Vector3.right * Time.deltaTime * npcSpeed);
-				}
-			}
 
-			if (Mathf.Abs(transform.position.y - finalTargetPosition.y) < .1f){
-				onCorrectFloor = true;
-			}			
+				if (Mathf.Abs(transform.position.x - locationController.stairsPosition.position.x) < .1f){
+					//wrong floor, on stairs
+					if (transform.position.y > finalTargetPosition.y){
+						//move down
+						transform.Translate(Vector3.down * Time.deltaTime * npcSpeed);
+					} else {
+						//move up
+						transform.Translate(Vector3.up * Time.deltaTime * npcSpeed);
+					}
+				} else {
+					//move towards stairs
+					if (transform.position.x > locationController.stairsPosition.position.x){
+						//move left
+						transform.Translate(Vector3.left * Time.deltaTime * npcSpeed);
+					} else {
+						//move up
+						transform.Translate(Vector3.right * Time.deltaTime * npcSpeed);
+					}
+				}
+
+				if (Mathf.Abs(transform.position.y - finalTargetPosition.y) < .1f){
+					onCorrectFloor = true;
+				}			
+			}
 		}
 
 		if (transform.position == finalTargetPosition && !targetReached){
@@ -109,6 +123,12 @@ public class NPCController : MonoBehaviour {
 			spiritSpriteRenderer.color = Color.LerpUnclamped(currentColor, new Color(1f,1f - terrorAsPercent,1f - terrorAsPercent,1f), colorLerpTime);
 			colorLerpTime += Time.deltaTime/colorLerpDuration;
 		}
+
+		if(terrorFalling){
+			currentTerror = Mathf.Clamp(currentTerror += (Time.deltaTime * npcBravery * -1f), 0f, maxTerror);
+		}
+
+		ChangeTension(Time.deltaTime * npcBravery * currentRoom.roomTension);
 
 	}
 
@@ -142,37 +162,54 @@ public class NPCController : MonoBehaviour {
 			}
 		} else if (other.tag == "Room"){
 			currentRoom = other.gameObject.GetComponent<RoomController>();
+			tensionFalling = !currentRoom.isHaunted;
+			terrorFalling = !currentRoom.isHaunted;
+		} else if (other.tag == "Lock"){
+			Debug.Log("LockEnter");
+			canMove = false;
 		}
 	}
 
-	public void ScareNPC(int terror){
+	void OnTriggerExit2D(Collider2D other){
+		if (other.tag == "Lock"){
+			Debug.Log("LockExit");
+			canMove = true;
+		}
+	}
+
+	public void ScareNPC(float terror){
 
 		//audioSource.PlayOneShot(scaredSound);
+		if(!isFleeing){
+	
+			Debug.Log("Scare value: " + (terror * currentTension / 100f));
+			currentTerror = Mathf.Clamp(currentTerror += (terror * currentTension / 100f), 0f, maxTerror);
+			terrorAsPercent = (float)currentTerror / maxTerror;
 
-		currentTerror += terror;
-		terrorAsPercent = (float)currentTerror / maxTerror;
+			currentTension = 0;
 
-		currentColor = spiritSpriteRenderer.color;
-		colorLerpTime = 0;
+			currentColor = spiritSpriteRenderer.color;
+			colorLerpTime = 0;
 
-		isFleeing = true;
+			isFleeing = true;
 
-		if (terrorAsPercent >= 1f){
-			Debug.Log("Flee house");
+			if (terrorAsPercent >= 1f){
+				Debug.Log("Flee house");
 
-			coroutine = PlayNPCSound(0.4f, npcScaredSounds[0]);
-			StartCoroutine(coroutine);
+				coroutine = PlayNPCSound(0.2f, npcScaredSounds[0]);
+				StartCoroutine(coroutine);
 
-			npcSpeed = npcSpeed * 4;
-			FleeHouse();
-		} else {
+				npcSpeed = npcSpeed * 4;
+				FleeHouse();
+			} else {
 
-			Debug.Log("run to new room");
+				Debug.Log("run to new room");
 
-			coroutine = PlayNPCSound(0.4f, npcScaredSounds[1]);
-			StartCoroutine(coroutine);
-			npcSpeed = npcSpeed * 2;
-			SetNewTarget();
+				coroutine = PlayNPCSound(0.2f, npcScaredSounds[1]);
+				StartCoroutine(coroutine);
+				npcSpeed = npcSpeed * 2;
+				SetNewTarget();
+			}
 		}
 	}
 
@@ -185,7 +222,13 @@ public class NPCController : MonoBehaviour {
 		TrackLocation(exitRoom);
 	}
 
-
+	public void ChangeTension(float tension){
+		currentTension = Mathf.Clamp(currentTension += tension, 50f, maxTension);
+		if(currentTension >= maxTension){
+			npcSpeed = npcSpeed * 2;
+			SetNewTarget();
+		}
+	}
 
 
 		

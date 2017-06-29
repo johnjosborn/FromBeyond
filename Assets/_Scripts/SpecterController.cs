@@ -11,12 +11,14 @@ public class SpecterController : MonoBehaviour {
 
 	private bool actionInUse;
 
+	public Camera livingCamera;
 
 	public bool canMove;
 
 	public float effectiveMoveSpeed;
 	public float maxMoveSpeed;
 	public float actionTime;
+	public float timePerAction;
 
 
 	// Use this for initialization
@@ -26,7 +28,7 @@ public class SpecterController : MonoBehaviour {
 		specterData = GetComponent<SpecterData>();
 		canMove = true;
 		effectiveMoveSpeed = maxMoveSpeed;
-		actionTime = -1f;
+		actionTime = -2f;
 	}
 		
 	// Update is called once per frame
@@ -50,7 +52,7 @@ public class SpecterController : MonoBehaviour {
 			}
 		} 
 
-		if (Time.time - actionTime > 1f){
+		if (Time.time - actionTime > timePerAction){
 
 			if (Input.GetAxisRaw ("Fire1") != 0) {
 				if (!actionInUse) {
@@ -58,9 +60,6 @@ public class SpecterController : MonoBehaviour {
 					actionTime = Time.time;
 					specterData.CallNPC();
 				}
-			}
-			if (Input.GetAxisRaw ("Fire1") == 0) {
-				actionInUse = false;
 			}
 
 			if (Input.GetAxisRaw ("Fire2") != 0) {
@@ -70,11 +69,29 @@ public class SpecterController : MonoBehaviour {
 					specterData.ScaryNoise();
 				}
 			}
-			if (Input.GetAxisRaw ("Fire2") == 0) {
-				actionInUse = false;
-			}
-		}
 
+			if (Input.GetAxisRaw ("Fire3") != 0) {
+				if (!actionInUse) {
+					actionInUse = true;
+					actionTime = Time.time;
+					specterData.LockDoors();
+				}
+			}
+
+			if (Input.GetAxisRaw ("Fire1") == 0 && Input.GetAxisRaw ("Fire2") == 0 && Input.GetAxisRaw ("Fire3") == 0) {
+				actionInUse = false;
+			}	
+
+			if (Input.GetButtonDown("LightsOut")){ //K
+				specterData.LightsOff();
+				actionTime = Time.time;
+			}
+
+		}
+			
+		if (Input.GetButtonDown("LivingView")){ //L
+			livingCamera.enabled = !livingCamera.enabled;
+		}
 	}
 
 

@@ -10,8 +10,10 @@ public class SpecterData : MonoBehaviour {
 	private AudioSource audioSource;
 
 	public AudioClip scarySound;
+	public AudioClip lockSound;
 
 	public GameObject sound;
+	public GameObject roomDarkness;
 	public RoomController currentRoom;
 
 	private float energyAsAPercent;
@@ -31,7 +33,14 @@ public class SpecterData : MonoBehaviour {
 	public float soundRange;
 	public float soundCost;
 
-	public int scarySountPoints = 2;
+	public float darkCost;
+	public float darkDuration;
+	public float darknessTension;
+
+	public float scarySoundPoints = 2f;
+
+	public float lockDuration = 3f;
+	public float lockCost;
 
 
 	// Use this for initialization
@@ -94,10 +103,19 @@ public class SpecterData : MonoBehaviour {
 	}
 
 	public void ScaryNoise(){
-		//playScarySound
-		//affect npcs in room
 		audioSource.PlayOneShot(scarySound);
 		playManager.ScarySound();
+		ChangeEnergy(soundCost);
+	}
 
+	public void LockDoors(){
+		audioSource.PlayOneShot(lockSound);
+		currentRoom.ActivateLocks();
+		ChangeEnergy(lockCost);
+	}
+
+	public void LightsOff(){
+		currentRoom.ActivateDarkness();
+		ChangeEnergy(darkCost);
 	}
 }

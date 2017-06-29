@@ -20,7 +20,7 @@ public class PlayManager : MonoBehaviour {
 		foreach (var npc in npcControllers) {
 
 			if (npc.currentRoom == specterData.currentRoom && !npc.isFleeing){
-				npc.ScareNPC(specterData.scarySountPoints);
+				npc.ScareNPC(specterData.scarySoundPoints);
 			}
 		}
 	}
