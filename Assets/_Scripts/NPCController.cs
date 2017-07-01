@@ -124,7 +124,7 @@ public class NPCController : MonoBehaviour {
 			colorLerpTime += Time.deltaTime/colorLerpDuration;
 		}
 
-		if(terrorFalling){
+		if(terrorFalling && !isFleeing){
 			currentTerror = Mathf.Clamp(currentTerror += (Time.deltaTime * npcBravery * -1f), 0f, maxTerror);
 		}
 
@@ -133,13 +133,16 @@ public class NPCController : MonoBehaviour {
 	}
 
 	void SetNewTarget(){
-		Debug.Log("Set new target method.");
+		do {
+			finalTarget = locationController.GetEmptyRoom();
+		}
+		while (finalTarget == currentRoom);
+
 		finalTarget = locationController.GetEmptyRoom();
 		TrackLocation(finalTarget);
 	}
 
 	void TrackLocation(RoomController room){
-		Debug.Log("Room tracked: " + room.ToString() + " time " + Time.time.ToString());
 		targetReached = false;
 		finalTargetPosition = room.transform.position;
 		if (Mathf.Abs(transform.position.y - finalTargetPosition.y) < .1f){
@@ -178,9 +181,6 @@ public class NPCController : MonoBehaviour {
 	}
 
 	public void ScareNPC(float terror){
-
-		//audioSource.PlayOneShot(scaredSound);
-		if(!isFleeing){
 	
 			Debug.Log("Scare value: " + (terror * currentTension / 100f));
 			currentTerror = Mathf.Clamp(currentTerror += (terror * currentTension / 100f), 0f, maxTerror);
@@ -210,7 +210,6 @@ public class NPCController : MonoBehaviour {
 				npcSpeed = npcSpeed * 2;
 				SetNewTarget();
 			}
-		}
 	}
 
 	IEnumerator PlayNPCSound(float delaySound, AudioClip clipToPlay){

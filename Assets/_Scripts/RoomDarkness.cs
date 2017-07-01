@@ -9,6 +9,8 @@ public class RoomDarkness : MonoBehaviour {
 
 	private float startTime;
 
+
+
 	// Use this for initialization
 	void Start () {
 		roomController = GetComponentInParent<RoomController>();

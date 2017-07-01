@@ -6,23 +6,46 @@ public class DoorLock : MonoBehaviour {
 
 	public List<NPCController> npcControls;
 	private SpecterData specterData;
+	private BoxCollider2D doorCollider;
+	public GameObject doorImage;
 
 	private float startTime;
+	public float targetScale;
+	public float moveDuration;
+	private bool doorClosed;
+
+	public float defaultXScale;
+	private float lerpTimer;
 
 	// Use this for initialization
 	void Start () {
 		specterData = FindObjectOfType<SpecterData>();
+		doorCollider = GetComponent<BoxCollider2D>();
+		doorCollider.enabled = false;
+		lerpTimer = 1;
+		defaultXScale = doorImage.transform.localScale.x;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		if(Time.time - startTime >= specterData.lockDuration){
-			Deactivate();
+		if(Time.time - startTime >= specterData.lockDuration && doorClosed){
+			doorCollider.enabled = false;
+			OpenDoor();
+		}
+
+		if(lerpTimer < 1f){
+			doorImage.transform.localScale = new Vector3(Mathf.Lerp(doorImage.transform.localScale.x, targetScale, lerpTimer),doorImage.transform.localScale.y, 0f);
+			lerpTimer += Time.deltaTime/moveDuration;
 		}
 	}
 
-	void OnEnable() {
+	public void CloseDoor() {
 		startTime = Time.time;
+		doorCollider.enabled = true;
+		lerpTimer = 0;
+		targetScale = 0;
+		doorClosed = true;
+		Debug.Log("Close doors");
 	}
 
 	void OnTriggerEnter2D(Collider2D other){
@@ -31,11 +54,14 @@ public class DoorLock : MonoBehaviour {
 		} 
 	}
 
-	void Deactivate(){
+	void OpenDoor(){
 		foreach (NPCController item in npcControls) {
 			item.canMove = true;
 		}
-		gameObject.SetActive(false);
+		lerpTimer = 0;
+		targetScale = defaultXScale;
+		doorClosed = false;
+		Debug.Log("Open doors");
 	}
 
 

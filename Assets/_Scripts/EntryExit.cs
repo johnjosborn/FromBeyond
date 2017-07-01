@@ -15,7 +15,6 @@ public class EntryExit : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D(Collider2D other){
-		Debug.Log("Enter");
 		if (other.tag == "NPC"){
 			Destroy(other.gameObject);
 		}

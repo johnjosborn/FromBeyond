@@ -14,7 +14,7 @@ public class UIController : MonoBehaviour {
 
 	public void UpdateEnergyFill(float energyPercent){
 		newPercent = energyPercent;
-		energyFillCurrent = (energyFill.uvRect.x + .5f) / 1.5f;
+		energyFillCurrent = (energyFill.uvRect.x ) * 2f;
 		//energyFill.uvRect = new Rect(-1f + energyPercent * 2f, 0, 1.0f, 1.0f);
 		floatLerpTime = 0f;
 	}
@@ -22,7 +22,7 @@ public class UIController : MonoBehaviour {
 	void Update(){
 		if(floatLerpTime < 1){
 			float fillPercent = Mathf.Lerp(energyFillCurrent, newPercent, floatLerpTime);
-			energyFill.uvRect = new Rect(-.5f + fillPercent * 1.5f, 0, 1.0f, 1.0f);
+			energyFill.uvRect = new Rect((fillPercent /2f), 0, 0.5f, 0.5f);
 			floatLerpTime += Time.deltaTime/floatLerpDuration;
 		}
 	}

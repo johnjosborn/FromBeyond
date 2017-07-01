@@ -8,7 +8,7 @@ public class RoomController : MonoBehaviour {
 	private SpriteRenderer spriteRenderer;
 	private LocationController locController;
 
-	private DoorLock[] doorLocks;
+	public DoorLock[] doorLocks;
 	private RoomDarkness roomDarkness;
 	private SpecterData specterData;
 	private int occupiedNPC;
@@ -41,14 +41,10 @@ public class RoomController : MonoBehaviour {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		locController = FindObjectOfType<LocationController>();
 		specterData = FindObjectOfType<SpecterData>();
-		doorLocks = GetComponentsInChildren<DoorLock>();
 		roomDarkness = GetComponentInChildren<RoomDarkness>();
 		roomDarkness.gameObject.SetActive(false);
 		hauntedMarker.SetActive(false);
 
-		foreach (var doorLock in doorLocks) {
-			doorLock.gameObject.SetActive(false);
-		}
 	}
 
 
@@ -114,7 +110,7 @@ public class RoomController : MonoBehaviour {
 
 	public void ActivateLocks(){
 		foreach (var doorLock in doorLocks) {
-			doorLock.gameObject.SetActive(true);
+			doorLock.CloseDoor();
 		}
 	}
 

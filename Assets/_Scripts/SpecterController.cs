@@ -52,42 +52,42 @@ public class SpecterController : MonoBehaviour {
 			}
 		} 
 
-		if (Time.time - actionTime > timePerAction){
+		//if (Time.time - actionTime > timePerAction){
 
-			if (Input.GetAxisRaw ("Fire1") != 0) {
-				if (!actionInUse) {
-					actionInUse = true;
-					actionTime = Time.time;
-					specterData.CallNPC();
-				}
+		if (Input.GetAxisRaw ("Fire1") != 0) {
+			if (!actionInUse) {
+				actionInUse = true;
+				//actionTime = Time.time;
+				specterData.Ability1();
 			}
-
-			if (Input.GetAxisRaw ("Fire2") != 0) {
-				if (!actionInUse) {
-					actionInUse = true;
-					actionTime = Time.time;
-					specterData.ScaryNoise();
-				}
-			}
-
-			if (Input.GetAxisRaw ("Fire3") != 0) {
-				if (!actionInUse) {
-					actionInUse = true;
-					actionTime = Time.time;
-					specterData.LockDoors();
-				}
-			}
-
-			if (Input.GetAxisRaw ("Fire1") == 0 && Input.GetAxisRaw ("Fire2") == 0 && Input.GetAxisRaw ("Fire3") == 0) {
-				actionInUse = false;
-			}	
-
-			if (Input.GetButtonDown("LightsOut")){ //K
-				specterData.LightsOff();
-				actionTime = Time.time;
-			}
-
 		}
+
+		if (Input.GetAxisRaw ("Fire2") != 0) {
+			if (!actionInUse) {
+				actionInUse = true;
+				//actionTime = Time.time;
+				specterData.Ability2();
+			}
+		}
+
+		if (Input.GetAxisRaw ("Fire3") != 0) {
+			if (!actionInUse) {
+				actionInUse = true;
+				//actionTime = Time.time;
+				specterData.Ability3();
+			}
+		}
+
+		if (Input.GetAxisRaw ("Fire1") == 0 && Input.GetAxisRaw ("Fire2") == 0 && Input.GetAxisRaw ("Fire3") == 0) {
+			actionInUse = false;
+		}	
+
+		if (Input.GetButtonDown("LightsOut")){ //K
+			specterData.Ability4();
+			//actionTime = Time.time;
+		}
+
+		//}
 			
 		if (Input.GetButtonDown("LivingView")){ //L
 			livingCamera.enabled = !livingCamera.enabled;

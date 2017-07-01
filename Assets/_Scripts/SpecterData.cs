@@ -12,6 +12,8 @@ public class SpecterData : MonoBehaviour {
 	public AudioClip scarySound;
 	public AudioClip lockSound;
 
+	public AudioClip insufficientAbility;
+
 	public GameObject sound;
 	public GameObject roomDarkness;
 	public RoomController currentRoom;
@@ -41,6 +43,12 @@ public class SpecterData : MonoBehaviour {
 
 	public float lockDuration = 3f;
 	public float lockCost;
+
+	public AbilityController ability1;
+	public AbilityController ability2;
+	public AbilityController ability3;
+	public AbilityController ability4;
+	public AbilityController ability5;
 
 
 	// Use this for initialization
@@ -97,24 +105,68 @@ public class SpecterData : MonoBehaviour {
 
 	}
 
-	public void CallNPC(){
+	public void Ability1(){
+		if (!ability1.isCharging){
+			ability1.UseAbility();
+			CallNPC();
+		} else {
+			audioSource.PlayOneShot(insufficientAbility);
+		}
+	}
+
+	public void Ability2(){
+		if (!ability2.isCharging){
+			ability2.UseAbility();
+			ScaryNoise();
+		} else {
+			audioSource.PlayOneShot(insufficientAbility);
+		}
+	}
+
+	public void Ability3(){
+		if (!ability3.isCharging){
+			ability3.UseAbility();
+			LockDoors();
+		} else {
+			audioSource.PlayOneShot(insufficientAbility);
+		}
+	}
+
+	public void Ability4(){
+		if (!ability4.isCharging){
+			ability4.UseAbility();
+			LightsOff();
+		} else {
+			audioSource.PlayOneShot(insufficientAbility);
+		}
+	}
+
+	public void Ability5(){
+		if (!ability5.isCharging){
+			ability5.UseAbility();
+		} else {
+			audioSource.PlayOneShot(insufficientAbility);
+		}
+	}
+
+	void CallNPC(){
 		GameObject newSound = Instantiate (sound) as GameObject;
 		ChangeEnergy(soundCost);
 	}
 
-	public void ScaryNoise(){
+	void ScaryNoise(){
 		audioSource.PlayOneShot(scarySound);
 		playManager.ScarySound();
 		ChangeEnergy(soundCost);
 	}
 
-	public void LockDoors(){
+	void LockDoors(){
 		audioSource.PlayOneShot(lockSound);
 		currentRoom.ActivateLocks();
 		ChangeEnergy(lockCost);
 	}
 
-	public void LightsOff(){
+	void LightsOff(){
 		currentRoom.ActivateDarkness();
 		ChangeEnergy(darkCost);
 	}
