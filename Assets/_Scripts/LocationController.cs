@@ -6,43 +6,27 @@ public class LocationController : MonoBehaviour {
 
 	public Transform stairsPosition;
 
-	public RoomController[] roomControllers;
+	public TravelLocation[] travelLocations;
+
+	private TravelLocation location;
 
 	private RoomController room;
 
 	// Use this for initialization
 	void Start () {
-		roomControllers = FindObjectsOfType<RoomController>();
+		travelLocations = FindObjectsOfType<TravelLocation>();
+
 	}
 
-	public RoomController GetEmptyRoom(){
+	public TravelLocation GetLocation(){
 		do {
-			room = roomControllers[Random.Range(0,roomControllers.Length)];
+			location = travelLocations[Random.Range(0,travelLocations.Length)];
+			room = location.GetComponentInParent<RoomController>();
+
 		}
 		while (room.isHaunted == true);
 
-		return room;
+		return location;
 	}
-
-	public void UnblockAdjacentRooms(float xPos, float yPos, bool isStairs){
-		foreach (var item in roomControllers){
-			float roomX = item.transform.position.x;
-			float roomY = item.transform.position.y;
-			if (isStairs){
-				if (Mathf.Abs(roomX - xPos) <= 5.1f && Mathf.Abs(roomY - yPos) <= 0.1f){
-					item.RemoveBlock();
-					item.isLocked = false;
-				}
-				if (Mathf.Abs(roomX - xPos) <= 0.1f && Mathf.Abs(roomY - yPos) <= 5.1f){
-					item.RemoveBlock();
-					item.isLocked = false;
-				}
-			} else {
-				if (Mathf.Abs(roomX - xPos) <= 5.1f && Mathf.Abs(roomY - yPos) <= 0.1f){
-					item.RemoveBlock();
-					item.isLocked = false;
-				}
-			}
-		}
-	}
+		
 }

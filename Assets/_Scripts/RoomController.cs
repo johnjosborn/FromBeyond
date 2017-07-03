@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class RoomController : MonoBehaviour {
 
-	private RoomBlock roomBlock;
 	private SpriteRenderer spriteRenderer;
 	private LocationController locController;
 
@@ -37,14 +36,12 @@ public class RoomController : MonoBehaviour {
 
 
 	void Start () {
-		roomBlock = GetComponentInChildren<RoomBlock>();
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		locController = FindObjectOfType<LocationController>();
 		specterData = FindObjectOfType<SpecterData>();
 		roomDarkness = GetComponentInChildren<RoomDarkness>();
 		roomDarkness.gameObject.SetActive(false);
 		hauntedMarker.SetActive(false);
-
 	}
 
 
@@ -58,16 +55,13 @@ public class RoomController : MonoBehaviour {
 		}
 
 		if (isHaunted){
-			//spriteRenderer.color = new Color(.59f,.75f,.8f, 1f);
 			hauntedMarker.SetActive(true);
-		} else if (!isLocked){
+		} else {
 			hauntingAsAPercentage = (float)hauntingLevel / requiredToHaunt;
 			spriteRenderer.color = new Color(hauntingAsAPercentage,hauntingAsAPercentage,hauntingAsAPercentage, 1f);
-		} else {
-			spriteRenderer.color = Color.red;
-		}
+		} 
 
-		if(colorLerpTime < 1 && !isHaunted && !isLocked){
+		if(colorLerpTime < 1 && !isHaunted){
 			spriteRenderer.color = Color.LerpUnclamped(currentColor, new Color(hauntingAsAPercentage,hauntingAsAPercentage,hauntingAsAPercentage, 1f), colorLerpTime);
 			colorLerpTime += Time.deltaTime/colorLerpDuration;
 		}
@@ -78,7 +72,7 @@ public class RoomController : MonoBehaviour {
 		hauntingLevel = Mathf.Clamp(hauntingLevel + haunt, 0, requiredToHaunt);
 		//roomTension += haunt;
 		if (hauntingLevel >= requiredToHaunt / 2){
-			locController.UnblockAdjacentRooms(transform.position.x, transform.position.y, isStairs);
+			//locController.UnblockAdjacentRooms(transform.position.x, transform.position.y, isStairs);
 		}
 		if (hauntingLevel >= requiredToHaunt){
 			isHaunted = true;
@@ -86,10 +80,6 @@ public class RoomController : MonoBehaviour {
 		}
 		currentColor = spriteRenderer.color;
 		colorLerpTime = 0f;
-	}
-
-	public void RemoveBlock(){
-		roomBlock.gameObject.SetActive(false);
 	}
 
 	void OnTriggerEnter2D(Collider2D other){
