@@ -15,11 +15,12 @@ public class SpecterData : MonoBehaviour {
 	public AudioClip insufficientAbility;
 
 	public GameObject sound;
+
 	public GameObject roomDarkness;
 	public RoomController currentRoom;
 
 	private float energyAsAPercent;
-	private int hauntRate = 1;
+	private int hauntRate = 11;
 
 	private float processTimeInc = 1f;
 	private float processTime = 0f;
@@ -39,7 +40,7 @@ public class SpecterData : MonoBehaviour {
 	public float darkDuration;
 	public float darknessTension;
 
-	public float scarySoundPoints = 2f;
+	public float scarySoundDamage = 20f;
 
 	public float lockDuration = 3f;
 	public float lockCost;

@@ -6,6 +6,7 @@ public class RoomController : MonoBehaviour {
 
 	private SpriteRenderer spriteRenderer;
 	private LocationController locController;
+	private PlayManager playManager;
 
 	public DoorLock[] doorLocks;
 	private RoomDarkness roomDarkness;
@@ -39,6 +40,7 @@ public class RoomController : MonoBehaviour {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		locController = FindObjectOfType<LocationController>();
 		specterData = FindObjectOfType<SpecterData>();
+		playManager = FindObjectOfType<PlayManager>();
 		roomDarkness = GetComponentInChildren<RoomDarkness>();
 		roomDarkness.gameObject.SetActive(false);
 		hauntedMarker.SetActive(false);
@@ -77,6 +79,7 @@ public class RoomController : MonoBehaviour {
 		if (hauntingLevel >= requiredToHaunt){
 			isHaunted = true;
 			specterData.inSafeRoom = true;
+			playManager.CountHauntedRooms();
 		}
 		currentColor = spriteRenderer.color;
 		colorLerpTime = 0f;
