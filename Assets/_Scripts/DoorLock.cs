@@ -15,7 +15,7 @@ public class DoorLock : MonoBehaviour {
 	private bool doorClosed;
 
 	public float defaultXScale;
-	private float lerpTimer;
+	public float lerpTimer;
 
 	// Use this for initialization
 	void Start () {
